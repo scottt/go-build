@@ -1,0 +1,42 @@
+#!/bin/sh
+
+# https://golang.org/doc/install/source#git
+# https://golang.org/doc/install/source#environment
+# https://src.fedoraproject.org/rpms/golang/blob/master/f/golang.spec
+
+version=$(cat GO-VERSION)
+version=${version:=go1.11}
+
+export GOROOT_BOOTSTRAP=/usr
+export GOROOT_FINAL=$HOME/"$version"
+
+build() {
+	cd go/src && \
+	git checkout "$version" && \
+	./make.bash --no-clean -v && \
+	cd .. && \
+	GOROOT=$(pwd) PATH=$(pwd)/bin:$PATH go install -buildmode=shared -v -x std && \
+	GOROOT=$(pwd) PATH=$(pwd)/bin:$PATH go install -race -v -x std && \
+	cd src && \
+	GOROOT=$(pwd) PATH=$(pwd)/bin:$PATH go get golang.org/x/tools/cmd/... # godoc
+}
+
+install() {
+	rm -rf $GOROOT_FINAL && \
+	mkdir -p $GOROOT_FINAL && \
+	pushd go && \
+		cp -apv api bin doc favicon.ico lib pkg robots.txt src test VERSION \
+			$GOROOT_FINAL && \
+	popd && \
+	./template-gen --go-version "$version" go.env.in && \
+	printf '\n\nSource the "go.env" file to set PATH\n' && \
+	printf 'go tool {cover,vet,pprof} etc are available\n' && \
+	printf 'Set GOPATH to your workspace directory\n'
+}
+
+bname=$(basename $0)
+case $bname in
+go-build) build ;;
+go-install) install ;;
+*) printf 'GOROOT_BOOTSTRAP: %s\n''GOROOT_FINAL: %s\n' "$GOROOT_BOOTSTRAP" "$GOROOT_FINAL"
+esac

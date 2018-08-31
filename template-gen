@@ -1,0 +1,23 @@
+#!/usr/bin/env python3
+
+import sys
+import os
+import argparse
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--go-version', required=True)
+    parser.add_argument('template', nargs='+')
+
+    args = parser.parse_args()
+    for i in args.template:
+        template_fname = i
+        assert(template_fname.endswith('.in'))
+        template_dest = template_fname[:-len('.in')]
+        with open(template_fname) as f:
+            c = f.read().format_map(vars(args))
+        with open(template_dest, 'w') as f:
+            f.write(c)
+
+if __name__ == '__main__':
+    main()
