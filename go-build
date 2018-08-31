@@ -1,5 +1,13 @@
-#!/bin/sh
+#!/bin/bash
 
+# SYNOPSIS:
+# $ source go-build   # set GOROOT_{BOOTSTRAP,FINAL} environment variables in the interacive shell
+# $ ./go-build        # build golang
+# $ ./go-install      # install into $HOME/go1.11 etc
+#
+# The file 'GO-VERSION' should contain a string like 'go1.11'
+
+# Rerfences:
 # https://golang.org/doc/install/source#git
 # https://golang.org/doc/install/source#environment
 # https://src.fedoraproject.org/rpms/golang/blob/master/f/golang.spec
@@ -11,13 +19,13 @@ export GOROOT_BOOTSTRAP=/usr
 export GOROOT_FINAL=$HOME/"$version"
 
 build() {
-	cd go/src && \
+	pushd go/src && \
 	git checkout "$version" && \
 	./make.bash --no-clean -v && \
-	cd .. && \
+	popd && \
+	pushd go && \
 	GOROOT=$(pwd) PATH=$(pwd)/bin:$PATH go install -buildmode=shared -v -x std && \
 	GOROOT=$(pwd) PATH=$(pwd)/bin:$PATH go install -race -v -x std && \
-	cd src && \
 	GOROOT=$(pwd) PATH=$(pwd)/bin:$PATH go get golang.org/x/tools/cmd/... # godoc
 }
 
