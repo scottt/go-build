@@ -1,0 +1,24 @@
+#!/bin/bash
+
+# assume user sourced 'go.env' or otherwise have PATH pointing to the correct 'go' and 'godoc' binary
+godoc-build-index() {
+	godoc -v -index_files $(go env GOPATH)/godoc.index -write_index $@
+}
+
+godoc-with-index() {
+	GOROOT=$(go env GOROOT)
+	GOPATH=$(go env GOPATH)
+	if [ -f "$GOPATH"/godoc.index ]; then
+		index="$GOPATH"/godoc.index
+	elif [ -f "$GOROOT"/godoc.index ]; then
+		index="$GOROOT"/godoc.index
+	fi
+	godoc -v -http=:6060 -index -index_files $index $@
+}
+
+bname=$(basename $0)
+case $bname in
+godoc-build-index) godoc-build-index $@ ;;
+godoc-with-index) godoc-with-index $@ ;;
+*) printf 'Unknown command name "%s"\n' "$bname" >&2 ; exit 2 ;;
+esac
