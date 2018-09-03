@@ -25,8 +25,7 @@ build() {
 	popd && \
 	pushd go && \
 	GOROOT=$(pwd) PATH=$(pwd)/bin:$PATH go install -buildmode=shared -v -x std && \
-	GOROOT=$(pwd) PATH=$(pwd)/bin:$PATH go install -race -v -x std && \
-	GOROOT=$(pwd) PATH=$(pwd)/bin:$PATH go get golang.org/x/tools/cmd/... # godoc
+	GOROOT=$(pwd) PATH=$(pwd)/bin:$PATH go install -race -v -x std
 }
 
 install() {
@@ -40,6 +39,8 @@ install() {
 	printf '\n\nSource the "go.env" file to set PATH\n' && \
 	printf 'go tool {cover,vet,pprof} etc are available\n' && \
 	printf 'Set GOPATH to your workspace directory\n'
+
+	#GOROOT="$GOROOT_FINAL" GOPATH="$GOROOT" PATH="$GOROOT"/bin:"$PATH" go get -v golang.org/x/tools/cmd/godoc && \
 }
 
 bname=$(basename $0)
